@@ -392,9 +392,7 @@ local signature_handler = function(err, result, ctx, config)
   end
 
   -- total lines allowed
-  if config.trigger_from_lsp_sig then
-    lines = helper.truncate_doc(lines, num_sigs)
-  end
+  lines = helper.truncate_doc(lines, num_sigs)
 
   -- log(lines)
   if vim.tbl_isempty(lines) then
@@ -527,6 +525,10 @@ local signature_handler = function(err, result, ctx, config)
     end
   end
   helper.highlight_parameter(s, l)
+
+  -- vim.pretty_print(lines)
+  -- vim.pretty_print(s)
+  -- vim.pretty_print(l)
 
   return lines, s, l
 end
