@@ -526,7 +526,9 @@ local signature_handler = function(err, result, ctx, config)
   end
   helper.highlight_parameter(s, l)
 
-  vim.pretty_print(lines)
+  -- vim.pretty_print(lines)
+  -- vim.pretty_print(s)
+  -- vim.pretty_print(l)
 
   return lines, s, l
 end
