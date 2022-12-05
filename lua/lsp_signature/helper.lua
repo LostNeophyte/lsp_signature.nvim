@@ -380,7 +380,15 @@ local function get_border_height(opts)
   return height
 end
 
+helper.is_line_displayed = function(line)
+  if line:match("^```") or (line:match("^<%a+>$") and line ~= "<br>") then
+    return false
+  end
+  return true
+end
+
 helper.cal_pos = function(contents, opts)
+  -- vim.pretty_print(contents)
   local lnum = fn.line(".") - fn.line("w0") + 1
 
   local lines_above = fn.winline() - 1
@@ -403,10 +411,19 @@ helper.cal_pos = function(contents, opts)
 
   -- if the filetype returned is "markdown", and contents contains code fences, the height should minus 2,
   -- because the code fences won't be display
-  local code_block_flag = contents[1]:match("^```")
-  if filetype == "markdown" and code_block_flag ~= nil then
-    height = height - 2
-  end
+  -- if filetype == "markdown" then
+  --   if contents[1]:match("^```") then
+  --     float_option.height = float_option.height - 2
+  --   end
+  -- end
+
+  -- for i = 1, height do
+  --   if contents[i] == "" then
+  --     float_option.height = float_option.height - 1
+  --   end
+  -- end
+  -- vim.pretty_print(float_option.height)
+  -- vim.pretty_print(#contents)
 
   log("popup size:", width, height, float_option)
   local off_y = 0
@@ -495,7 +512,7 @@ function helper.cal_woff(line_to_cursor, label)
 end
 
 function helper.truncate_doc(lines, num_sigs)
-  local doc_num = 2 + _LSP_SIG_CFG.doc_lines -- 3: markdown code signature
+  local doc_num = _LSP_SIG_CFG.doc_lines
   local vmode = api.nvim_get_mode().mode
   -- truncate doc if in insert/replace mode
   if
@@ -512,11 +529,25 @@ function helper.truncate_doc(lines, num_sigs)
     -- log(#lines, doc_num, num_sigs)
     if #lines > doc_num + num_sigs then -- for markdown doc start with ```text and end with ```
       local last = lines[#lines]
-      lines = vim.list_slice(lines, 1, doc_num + num_sigs)
-      if last == "```" then
-        table.insert(lines, "```")
+      local visible_lines_num = 0
+
+      for i, line in ipairs(lines) do
+        if helper.is_line_displayed(line) then
+          visible_lines_num = visible_lines_num + 1
+
+          if visible_lines_num > num_sigs + doc_num then
+            -- vim.pretty_print(i)
+            -- vim.pretty_print(lines)
+            -- lines = vim.list_slice(lines, 1, i - 1)
+            -- if last == "```" then
+            --   table.insert(lines, "```")
+            -- end
+            -- log("lines truncate", lines)
+            break
+          end
+
+        end
       end
-      log("lines truncate", lines)
     end
   end
 
